@@ -45,4 +45,20 @@ class BaseController
         echo $data;
         exit;
     }
+    public function imprimir($datos)
+    {
+        echo "<pre>";
+        print_r($datos);
+        echo "</pre>";
+        die();
+    }
+    public function respuesta($cod, $msj, $datos = [])
+    {
+        $respuesta = [
+            "codigo" => $cod,
+            "mensaje" => $msj,
+            "datos" => $datos,
+        ];
+        return json_encode($respuesta);
+    }
 }
