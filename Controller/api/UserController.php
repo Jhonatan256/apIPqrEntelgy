@@ -111,7 +111,6 @@ class UserController extends BaseController
         if (strtoupper($requestMethod) == 'POST') {
             try {
                 $userModel = new UserModel();
-
                 $pqr = $userModel->createPqr($_POST);
 
                 $responseData = parent::respuesta('00', '', $pqr);

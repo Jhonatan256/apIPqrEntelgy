@@ -50,6 +50,10 @@ class UserModel extends Database
     {
         $datos['asunto'] = mb_strtoupper($datos['asunto'], 'UTF-8');
         $datos['porcentaje'] = 0;
+        $datos['idResponsable'] = 13;
+        $datos['idPrioridad'] = 1;
+        $datos['idGravedad'] = 1;
+        $datos['idEstado'] = 1;
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
         $this->insertarRegistro("caso", $datos);
         return $this->lastInsertId();
