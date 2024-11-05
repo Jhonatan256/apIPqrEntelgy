@@ -46,16 +46,24 @@ class UserModel extends Database
         }
         return $salida;
     }
-    public function crearCaso($id)
+    public function createPqr($datos)
     {
-        $datos['nombres'] = mb_strtoupper($datos['nombres'], 'UTF-8');
-        $datos['apellidos'] = mb_strtoupper($datos['apellidos'], 'UTF-8');
-        $datos['cargo'] = mb_strtoupper($datos['cargo'], 'UTF-8');
-        $datos['genero'] = mb_strtoupper($datos['genero'], 'UTF-8');
-        $datos['password'] = password_hash($datos['password'], PASSWORD_DEFAULT);
+        $datos['asunto'] = mb_strtoupper($datos['asunto'], 'UTF-8');
+        $datos['porcentaje'] = 0;
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
-        $this->insertarRegistro("usuario", $datos);
-        $this->lastInsertId();
-        return $this->select("SELECT * FROM usuario WHERE id = ?", params: ["i", $id]);
+        $this->insertarRegistro("caso", $datos);
+        return $this->lastInsertId();
+    }
+    public function vistaPqr($email)
+    {
+        $usuario = $this->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => $email]);
+        if ($usuario) {
+            $salida['usuario'] = $usuario;
+        } else {
+            $salida['usuario'] = [];
+        }
+        $salida['areas'] = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
+        $salida['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
+        return $salida;
     }
 }
