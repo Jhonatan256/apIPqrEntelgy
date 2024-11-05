@@ -63,7 +63,7 @@ class Database
             $resdb = $this->connection->prepare($query);
             $resdb->execute($campos);
         } catch (\Throwable $th) {
-            imprimirDebug([$query, $campos, $filtro, $th]);
+            imprimir([$query, $campos, $filtro, $th]);
         }
         $respuesta = [];
         if ($resdb->rowCount() > 0) {

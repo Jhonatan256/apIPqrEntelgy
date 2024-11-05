@@ -18,4 +18,26 @@ class UserModel extends Database
         $this->insertarRegistro("usuario", $datos);
         $this->lastInsertId();
     }
+    public function loginUser($email, $password)
+    {
+        $usuario = $this->consultarRegistro("SELECT * FROM usuario WHERE email = :email ", ["email" => $email]);
+        $salida['cod'] = '99';
+        $salida['msj'] = '';
+        $salida['data'] = [];
+        if ($usuario) {
+            if (password_verify($password, $usuario['password'])) {
+                $salida['cod'] = '00';
+                $salida['msj'] = '';
+                $salida['data'] = $usuario;
+
+            } else {
+                $salida['cod'] = '99';
+                $salida['msj'] = 'Constraseña incorrecta.';
+            }
+        } else {
+            $salida['cod'] = '99';
+            $salida['msj'] = 'El usuario no esta registrado.';
+        }
+        return $salida;
+    }
 }

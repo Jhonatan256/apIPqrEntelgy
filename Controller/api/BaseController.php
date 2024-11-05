@@ -45,13 +45,7 @@ class BaseController
         echo $data;
         exit;
     }
-    public function imprimir($datos)
-    {
-        echo "<pre>";
-        print_r($datos);
-        echo "</pre>";
-        die();
-    }
+
     public function respuesta($cod, $msj, $datos = [])
     {
         $respuesta = [
@@ -61,4 +55,11 @@ class BaseController
         ];
         return json_encode($respuesta);
     }
+}
+function imprimir($datos)
+{
+    echo "<pre>";
+    print_r($datos);
+    echo "</pre>";
+    die();
 }
