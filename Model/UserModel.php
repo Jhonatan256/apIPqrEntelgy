@@ -16,7 +16,7 @@ class UserModel extends Database
         $datos['password'] = password_hash($datos['password'], PASSWORD_DEFAULT);
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
         $this->insertarRegistro("usuario", $datos);
-        $this->lastInsertId();
+        return $this->lastInsertId();
     }
     public function loginUser($email, $password)
     {
@@ -45,5 +45,17 @@ class UserModel extends Database
             $salida['msj'] = 'El usuario no esta registrado.';
         }
         return $salida;
+    }
+    public function crearCaso($id)
+    {
+        $datos['nombres'] = mb_strtoupper($datos['nombres'], 'UTF-8');
+        $datos['apellidos'] = mb_strtoupper($datos['apellidos'], 'UTF-8');
+        $datos['cargo'] = mb_strtoupper($datos['cargo'], 'UTF-8');
+        $datos['genero'] = mb_strtoupper($datos['genero'], 'UTF-8');
+        $datos['password'] = password_hash($datos['password'], PASSWORD_DEFAULT);
+        $datos['fechaCreacion'] = date('Y-m-d H:i:s');
+        $this->insertarRegistro("usuario", $datos);
+        $this->lastInsertId();
+        return $this->select("SELECT * FROM usuario WHERE id = ?", params: ["i", $id]);
     }
 }
