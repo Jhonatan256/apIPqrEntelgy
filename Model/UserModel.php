@@ -26,9 +26,15 @@ class UserModel extends Database
         $salida['data'] = [];
         if ($usuario) {
             if (password_verify($password, $usuario['password'])) {
-                $salida['cod'] = '00';
-                $salida['msj'] = '';
-                $salida['data'] = $usuario;
+                if ($usuario['eliminado'] == 'S') {
+                    $salida['cod'] = '99';
+                    $salida['msj'] = 'Usuario eliminado.';
+                } else {
+                    $salida['cod'] = '00';
+                    $salida['msj'] = '';
+                    $salida['data'] = $usuario;
+
+                }
 
             } else {
                 $salida['cod'] = '99';

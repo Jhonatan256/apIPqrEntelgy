@@ -81,7 +81,7 @@ class UserController extends BaseController
                     $userModel = new UserModel();
                     $arrUser = $userModel->loginUser($_POST['email'], $_POST['password']);
 
-                    $responseData = parent::respuesta($arrUser['cod'], $arrUser['msj']);
+                    $responseData = parent::respuesta($arrUser['cod'], $arrUser['msj'], $arrUser['data']);
                 } catch (Error $e) {
                     $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
                     $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
