@@ -13,4 +13,3 @@ define('NOMBRE_ADM_PLATAFORMA', 'PQR');
 define('EMAIL_ADM_PLATAFORMA', 'jhonatan.soporte98@gmail.com');
 define('SERVER_EMAIL_SECURE', 'tls');
 define('URL_SISTEMA', 'localhost');
-// define('KEY_TOKEN', 'Entelgy@2024');
