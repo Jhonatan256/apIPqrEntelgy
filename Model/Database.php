@@ -20,7 +20,7 @@ class Database
         }
     }
 
-    public function consultarRegistros($query, $campos = [])
+    public static function consultarRegistros($query, $campos = [])
     {
         $resdb = $this->connection->prepare($query);
         $resdb->execute($campos);
