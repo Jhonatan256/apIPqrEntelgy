@@ -71,7 +71,7 @@ class UsersClass
         if ($datosUsuario) {
             $clave = generarAleatorioClave();
             $this->db->actualizarRegistro('usuario', ['password' => password_hash($clave, PASSWORD_DEFAULT)], ['id' => $datosUsuario['id']]);
-            $asunto = 'Olvido de clave ' . NOMBRE_SISTEMA;
+            $asunto = rand(1-15) . ' Olvido de clave - ' . NOMBRE_SISTEMA;
             $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
             $mensaje .= "<p>Se ha generado la siguiente clave dinámica <b>$clave</b></p>";
             $url = URL_SISTEMA;
