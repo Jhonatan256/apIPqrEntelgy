@@ -2,7 +2,9 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+}
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 //
@@ -33,11 +35,7 @@ Flight::route('POST /getAreas', ['PqrClass', 'areas']);
 Flight::route('POST /listPqr', ['PqrClass', 'listarPqr']);
 //
 Flight::start();
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
-    http_response_code(200);
-    exit();
-}
 function getToken()
 {
     $headers = apache_request_headers();
