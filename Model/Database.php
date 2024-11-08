@@ -52,7 +52,7 @@ class Database
             }
             return $salida;
         } else {
-            return false;
+            return [];
         }
     }
 

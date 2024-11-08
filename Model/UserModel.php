@@ -70,8 +70,32 @@ class UserModel extends Database
         $salida['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
         return $salida;
     }
-    public function getAreas(){
-        $areas = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE 1=1");        
-        return $areas;
+    public function getAreas()
+    {
+        return $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado='N'");
+    }
+    public function getPqr($id)
+    {
+        $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
+        $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
+        $query .= " WHERE c.id=$id";
+        $pqr['caso'] = $this->consultarRegistro($query);
+        if ($pqr['caso']) {
+            $salida['cod'] = "00";
+            $salida['msj'] = "";
+            $pqr['historial'] = $this->consultarRegistros2("SELECT *  FROM historial WHERE idCaso = $id");
+            $pqr['areas'] = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
+            $pqr['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
+            $pqr['usuarios'] = $this->consultarRegistros2("SELECT CONCAT(nombres, ' ', apellidos) AS nombre, email  FROM usuario WHERE eliminado ='N'");
+            $pqr['estados'] = $this->consultarRegistros2("SELECT id, nombre  FROM estado WHERE eliminado ='N'");
+            $pqr['gravedad'] = $this->consultarRegistros2("SELECT id, nombre  FROM gravedad WHERE eliminado ='N'");
+            $pqr['prioridad'] = $this->consultarRegistros2("SELECT id, nombre  FROM prioridad WHERE eliminado ='N'");
+            $salida['datos'] = $pqr;
+        } else {
+            $salida['cod'] = "99";
+            $salida['msj'] = "No se encontro información relacionada.";
+            $salida['datos'] = [];
+        }
+        return $salida;
     }
 }

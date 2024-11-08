@@ -193,4 +193,33 @@ class UserController extends BaseController
             );
         }
     }
+    public function searchPqrAction()
+    {
+        $strErrorDesc = '';
+        $requestMethod = $_SERVER["REQUEST_METHOD"];
+        if (strtoupper($requestMethod) == 'POST' && !empty($_POST['id'])) {
+            try {
+                $userModel = new UserModel();
+                $rpt = $userModel->getPqr($_POST['id']);
+                $responseData = parent::respuesta($rpt['cod'], $rpt['msj'], $rpt['datos']);
+            } catch (Error $e) {
+                $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
+                $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
+            }
+        } else {
+            $strErrorDesc = empty($_POST['id']) ? "Numero de PQR inválido." : 'Method not supported';
+            $strErrorHeader = 'HTTP/1.1 422 Unprocessable Entity';
+        }
+        // send output
+        if (!$strErrorDesc) {
+            $this->sendOutput(
+                $responseData,
+                array('Content-Type: application/json', 'HTTP/1.1 200 OK')
+            );
+        } else {
+            $this->sendOutput(json_encode(array('error' => $strErrorDesc)),
+                array('Content-Type: application/json', $strErrorHeader)
+            );
+        }
+    }
 }
