@@ -1,7 +1,22 @@
 <?php
+require_once 'vendor/autoload.php';
+require_once __DIR__ . "/includes/boots.php";
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+$key = KEY_TOKEN;
+$now = strtotime("now");
+$payload = [
+    'exp' => $now + 3600,
+    'data' => 1,
+];
+$jwt = JWT::encode($payload, $key, 'HS256');
+$decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+print_r($jwt);
+die();
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
-require __DIR__ . "/includes/boots.php";
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 // print_r($uri);
