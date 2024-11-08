@@ -1,9 +1,14 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 //
+
+$headers = apache_request_headers();
+// imprimir($headers);
 require_once 'vendor/autoload.php';
 require_once 'includes/config.php';
 //
@@ -26,6 +31,11 @@ Flight::route('POST /getAreas', ['PqrClass', 'areas']);
 Flight::route('POST /listPqr', ['PqrClass', 'listarPqr']);
 //
 Flight::start();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+
+    http_response_code(200);
+    exit();
+}
 function getToken()
 {
     $headers = apache_request_headers();
