@@ -22,9 +22,9 @@ class UsersClass
                     $now = strtotime("now");
                     $payload = [
                         'exp' => $now + 3600,
-                        'data' => 1,
+                        'data' => $usuario['id'],
                     ];
-                    $usuario['jwt'] = JWT::encode($payload, $key, 'HS256');
+                    $usuario['token'] = JWT::encode($payload, $key, 'HS256');
                     $salida = respuesta('00', 'Success', $usuario);
                 }
 
