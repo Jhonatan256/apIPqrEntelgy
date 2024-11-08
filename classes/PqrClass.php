@@ -63,4 +63,37 @@ class PqrClass
         $datos['fecha'] = date('Y-m-d H:i:s');
         return $this->db->insertarRegistro("historial", $datos);
     }
+    public function formularioPqr()
+    {
+        validateToken();
+        $usuario = $this->db->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => Flight::request()->data->email]);
+        if ($usuario) {
+            $datos['usuario'] = $usuario;
+            $datos['areas'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
+            $datos['tipoCaso'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
+            Flight::json(respuesta('00', '', $datos));
+        } else {
+            Flight::json(respuesta('88', 'Usuario no registrado.'));
+        }
+    }
+    public function areas()
+    {
+        validateToken();
+        $areas = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado='N'");
+        Flight::json(respuesta('00', 'success', $areas));
+    }
+    public function listarPqr()
+    {
+        validateToken();
+        $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
+        $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
+        $query .= " WHERE c.idInformador= :id";
+        $casos = $this->db->consultarRegistros2($query, ['id' => Flight::request()->data->id]);
+        if ($casos) {
+            Flight::json(respuesta('00', '', $casos));
+        } else {
+
+            Flight::json(respuesta('99', 'Sin registros.'));
+        }
+    }
 }
