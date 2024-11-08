@@ -231,7 +231,7 @@ class UserController extends BaseController
                 $userModel = new UserModel();
                 $rpt = $userModel->listPqr($_POST['id']);
                 if ($rpt) {
-                    $responseData = parent::respuesta('00', '00', $rpt);
+                    $responseData = parent::respuesta('00', '', $rpt);
                 } else {
                     $responseData = parent::respuesta('99', 'No se encontraron resultados');
                 }
