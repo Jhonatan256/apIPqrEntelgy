@@ -6,7 +6,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 //
-
+//
 $headers = apache_request_headers();
 // imprimir($headers);
 require_once 'vendor/autoload.php';
@@ -16,6 +16,8 @@ require_once 'classes/PqrClass.php';
 require_once 'classes/UsersClass.php';
 require_once 'model/Database.php';
 //
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 //Rutas
 Flight::route('GET|POST /', function () {
     Flight::json(respuesta('99', 'Acceso no permitido'));
@@ -43,7 +45,7 @@ function getToken()
         Flight::jsonHalt(respuesta('99', msj: 'Sin token de acceso.'), 401);
     }
     try {
-        return JWT::decode(str_replace('Bearer ', '', $headers['Authorization']), new Key(KEY_TOKEN, 'HS256'));
+        return JWT::decode(str_replace('Bearer ', '', $headers['Authorization']), new Key($_ENV['KEY_TOKEN'], 'HS256'));
     } catch (\Throwable $th) {
         Flight::jsonHalt(respuesta('99', 'Token fail: ' . $th), 401);
     }

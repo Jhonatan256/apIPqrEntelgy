@@ -20,7 +20,7 @@ class UsersClass
                     unset($usuario['password']);
                     $usuario['fechaUltimoAcceso'] = date('Y-m-d H:i:s');
                     $this->db->actualizarRegistro('usuario', ['fechaUltimoAcceso' => $usuario['fechaUltimoAcceso']], ['id' => $usuario['id']]);
-                    $key = KEY_TOKEN;
+                    $key = $_ENV['KEY_TOKEN'];
                     $now = strtotime("now");
                     $payload = [
                         'exp' => $now + 3600,
