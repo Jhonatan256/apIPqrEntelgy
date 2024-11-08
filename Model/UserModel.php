@@ -86,7 +86,7 @@ class UserModel extends Database
             $pqr['historial'] = $this->consultarRegistros2("SELECT *  FROM historial WHERE idCaso = $id");
             $pqr['areas'] = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
             $pqr['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
-            $pqr['usuarios'] = $this->consultarRegistros2("SELECT CONCAT(nombres, ' ', apellidos) AS nombre, email  FROM usuario WHERE eliminado ='N'");
+            $pqr['usuarios'] = $this->consultarRegistros2("SELECT CONCAT(u.nombres, ' ', u.apellidos) AS nombre, u.email, a.nombre AS area FROM usuario u JOIN area a ON a.id = u.area WHERE u.eliminado ='N'");
             $pqr['estados'] = $this->consultarRegistros2("SELECT id, nombre  FROM estado WHERE eliminado ='N'");
             $pqr['gravedad'] = $this->consultarRegistros2("SELECT id, nombre  FROM gravedad WHERE eliminado ='N'");
             $pqr['prioridad'] = $this->consultarRegistros2("SELECT id, nombre  FROM prioridad WHERE eliminado ='N'");
@@ -97,5 +97,13 @@ class UserModel extends Database
             $salida['datos'] = [];
         }
         return $salida;
+    }
+
+    public function listPqr($id)
+    {
+        $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
+        $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
+        $query .= " WHERE c.idInformador= :id";
+        return $this->consultarRegistros($query, ['id' => $id]);
     }
 }

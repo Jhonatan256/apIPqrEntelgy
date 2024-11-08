@@ -222,4 +222,37 @@ class UserController extends BaseController
             );
         }
     }
+    public function listPqrAction()
+    {
+        $strErrorDesc = '';
+        $requestMethod = $_SERVER["REQUEST_METHOD"];
+        if (strtoupper($requestMethod) == 'POST' && !empty($_POST['id'])) {
+            try {
+                $userModel = new UserModel();
+                $rpt = $userModel->listPqr($_POST['id']);
+                if ($rpt) {
+                    $responseData = parent::respuesta('00', '00', $rpt);
+                } else {
+                    $responseData = parent::respuesta('99', 'No se encontraron resultados');
+                }
+            } catch (Error $e) {
+                $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
+                $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
+            }
+        } else {
+            $strErrorDesc = empty($_POST['id']) ? "Usuario inválido." : 'Method not supported';
+            $strErrorHeader = 'HTTP/1.1 422 Unprocessable Entity';
+        }
+        // send output
+        if (!$strErrorDesc) {
+            $this->sendOutput(
+                $responseData,
+                array('Content-Type: application/json', 'HTTP/1.1 200 OK')
+            );
+        } else {
+            $this->sendOutput(json_encode(array('error' => $strErrorDesc)),
+                array('Content-Type: application/json', $strErrorHeader)
+            );
+        }
+    }
 }
