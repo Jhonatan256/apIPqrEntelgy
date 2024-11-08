@@ -39,11 +39,16 @@ class PqrClass
         // validateToken();
         $datos['asunto'] = mb_strtoupper(Flight::request()->data->asunto, 'UTF-8');
         $datos['descripcion'] = Flight::request()->data->descripcion;
-        $datos['idInformador'] = Flight::request()->data->idInformador;
+        if (empty(Flight::request()->data->idInformador)) {
+            $this->crearUsuarioExterno($this->db, Flight::request()->data->nombres, light::request()->data->apellidos, Flight::request()->data->cargo);
+        } else {
+            $datosUsuario = \Utilitarias::datosUsuario($this->db, Flight::request()->data->idInformador);
+            $datos['idInformador'] = $datosUsuario['id'];
+        }
         $datos['idArea'] = Flight::request()->data->idArea;
         $datos['tipoSolicitud'] = Flight::request()->data->tipoSolicitud;
         $datos['porcentaje'] = 0;
-        $datos['idResponsable'] = 13;
+        $datos['idResponsable'] = 1;
         $datos['idPrioridad'] = 1;
         $datos['idGravedad'] = 1;
         $datos['idEstado'] = 1;
@@ -60,7 +65,7 @@ class PqrClass
         $historico['fecha'] = $datos['fechaCreacion'];
         $this->crearHistorico($historico);
         $msj = 'Se creó la solicitud con éxito.';
-        $datosUsuario = \Utilitarias::datosUsuario($this->db, $datos['idInformador']);
+
         $asunto = $historico['idCaso'] . ' - Notificación de Registro de Requerimiento';
         $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
         $mensaje .= "<p>Se registro el siguiente requerimiento <b>#" . $historico['idCaso'] . "</b></p>";
@@ -82,12 +87,12 @@ class PqrClass
         $usuario = $this->db->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => Flight::request()->data->email]);
         if ($usuario) {
             $datos['usuario'] = $usuario;
-            $datos['areas'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
-            $datos['tipoCaso'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
-            Flight::json(respuesta('00', '', $datos));
         } else {
-            Flight::json(respuesta('88', 'Usuario no registrado.'));
+            $datos['usuario'] = [];
         }
+        $datos['areas'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
+        $datos['tipoCaso'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
+        Flight::json(respuesta('00', '', $datos));
     }
     public function areas()
     {
@@ -108,5 +113,21 @@ class PqrClass
 
             Flight::json(respuesta('99', 'Sin registros.'));
         }
+    }
+    public function crearUsuarioExterno($db, $nombres, $apellidos, $email, $cargo, $area, $genero)
+    {
+        $datos['nombres'] = mb_strtoupper($nombres, 'UTF-8');
+        $datos['apellidos'] = mb_strtoupper($apellidos, 'UTF-8');
+        $datos['identificacion'] = '';
+        $datos['email'] = $email;
+        $datos['celular'] = '';
+        $datos['tipoUsuario'] = 4;
+        $datos['cargo'] = mb_strtoupper($cargo, 'UTF-8');
+        $datos['area'] = $area;
+        $datos['genero'] = $genero;
+        $datos['password'] = password_hash(rand(5, 15), PASSWORD_DEFAULT);
+        $datos['fechaCreacion'] = date('Y-m-d H:i:s');
+        $db->insertarRegistro("usuario", $datos);
+        return $db->last_insert_id();
     }
 }

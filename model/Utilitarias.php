@@ -81,7 +81,7 @@ class Utilitarias
     }
     public static function datosUsuario($db, $id)
     {
-        return $db->consultarRegistro("SELECT CONCAT(nombres, ' ', apellidos) as nombre, email, genero FROM usuario WHERE id=$id", []);
+        return $db->consultarRegistro("SELECT id, CONCAT(nombres, ' ', apellidos) as nombre, email, genero FROM usuario WHERE id=$id", []);
     }
 }
 function generoCorreo($genero)
