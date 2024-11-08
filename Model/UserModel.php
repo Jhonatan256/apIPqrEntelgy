@@ -62,12 +62,16 @@ class UserModel extends Database
     {
         $usuario = $this->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => $email]);
         if ($usuario) {
-            $salida['usuario'] = $usuario;
+            $salida['cod'] = "00";
+            $salida['msj'] = "";
+            $salida['datos']['usuario'] = $usuario;
+            $salida['datos']['areas'] = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
+            $salida['datos']['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
         } else {
-            $salida['usuario'] = [];
+            $salida['cod'] = "88";
+            $salida['msj'] = "";
+            $salida['datos'] = [];
         }
-        $salida['areas'] = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
-        $salida['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
         return $salida;
     }
     public function getAreas()

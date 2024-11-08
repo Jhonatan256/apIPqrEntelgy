@@ -143,7 +143,7 @@ class UserController extends BaseController
                 $userModel = new UserModel();
 
                 $pqr = $userModel->vistaPqr($_POST['email']);
-                $responseData = parent::respuesta('00', '', $pqr);
+                $responseData = parent::respuesta($pqr['cod'], $pqr['msj'], $pqr['datos']);
             } catch (Error $e) {
                 $strErrorDesc = $e->getMessage() . 'Something went wrong! Please contact support.';
                 $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
