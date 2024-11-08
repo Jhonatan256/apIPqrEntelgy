@@ -35,7 +35,7 @@ function getToken()
     try {
         return JWT::decode(str_replace('Bearer ', '', $headers['Authorization']), new Key(KEY_TOKEN, 'HS256'));
     } catch (\Throwable $th) {
-        Flight::jsonHalt(respuesta('99', $th), 401);
+        Flight::jsonHalt(respuesta('99', 'Token fail: ' . $th), 401);
     }
 }
 function validateToken()
