@@ -70,4 +70,8 @@ class UserModel extends Database
         $salida['tipoCaso'] = $this->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
         return $salida;
     }
+    public function getAreas(){
+        $areas = $this->consultarRegistros2("SELECT id, nombre  FROM area WHERE 1=1");        
+        return $areas;
+    }
 }
