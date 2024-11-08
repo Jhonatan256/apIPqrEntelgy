@@ -64,5 +64,26 @@ class UsersClass
             return Flight::json(respuesta('99', 'Por favor, digite el correo corporativo.'));
         }
     }
+    public function olvidoClave()
+    {
+        $email = Flight::request()->data->email;
+        $datosUsuario = $this->db->consultarRegistro("SELECT id, CONCAT(nombres, ' ', apellidos) as nombre, email, genero FROM usuario WHERE email= :email", ['email' => $email]);
+        if ($datosUsuario) {
+            $clave = generarAleatorioClave();
+            $this->db->actualizarRegistro('usuario', ['password' => password_hash($clave, PASSWORD_DEFAULT)], ['id' => $datosUsuario['id']]);
+            $asunto = 'Olvido de clave ' . NOMBRE_SISTEMA;
+            $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
+            $mensaje .= "<p>Se ha generado la siguiente clave dinámica <b>$clave</b></p>";
+            $url = URL_SISTEMA;
+            $mensaje .= "<p>Ingresa a <a href='$url' target='_blank'>" . URL_SISTEMA . "</a> e ingrese la contraseña asignada.</p>";
+            if (\Utilitarias::enviarEmail($datosUsuario['email'], $asunto, $mensaje)) {
+                return Flight::json(respuesta('00', 'A su correo electrónico se le envió una nueva clave dinámica.'));
+            } else {
+                return Flight::json(respuesta('99', 'Correo no enviado.'));
+            }
+        } else {
+            return Flight::json(respuesta('99', 'El usuario no esta registrado.'));
 
+        }
+    }
 }

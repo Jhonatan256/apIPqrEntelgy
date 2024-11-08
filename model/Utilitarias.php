@@ -100,3 +100,26 @@ function generoCorreo($genero)
     }
     return $text;
 }
+function generarAleatorioClave($longitud = 6)
+{
+    $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    $claveValida = 'NO';
+    while ($claveValida === 'NO') {
+        $index = 0;
+        $clave = $tmp = '';
+        for ($i = 0; $i < $longitud; $i++) {
+            $tmp = $caracteres[random_int(0, strlen($caracteres) - 1)];
+            if (is_numeric($tmp)) {
+                $index++;
+            }
+            $clave .= $tmp;
+        }
+        if ($index == 3) {
+            $claveValida = 'SI';
+        }
+        if (strpos($clave, "0") == 0) {
+            $claveValida = 'NO';
+        }
+    }
+    return $clave;
+}

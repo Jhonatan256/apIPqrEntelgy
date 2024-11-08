@@ -32,6 +32,7 @@ Flight::route('GET|POST /', function () {
 //
 Flight::route('POST /login', ['UsersClass', 'loginUser']);
 Flight::route('POST /createUser', ['UsersClass', 'createUser']);
+Flight::route('POST /forgotPassword?', ['UsersClass', 'olvidoClave']);
 //
 Flight::route('POST /searchPqr', ['PqrClass', 'buscarPqr']);
 Flight::route('POST /createPqr', ['PqrClass', 'registrarPqr']);
