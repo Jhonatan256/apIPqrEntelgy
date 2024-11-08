@@ -56,7 +56,7 @@ class PqrClass
         $historico['porcentaje'] = $datos['porcentaje'];
         $historico['fecha'] = $datos['fechaCreacion'];
         $this->crearHistorico($historico);
-        Flight::json(respuesta('00', 'success'));
+        Flight::json(respuesta('00', 'success', $historico['idCaso']));
     }
     public function crearHistorico($datos)
     {
