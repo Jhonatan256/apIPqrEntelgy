@@ -78,7 +78,7 @@ class PqrClass
     }
     public function areas()
     {
-        validateToken();
+        // validateToken();
         $areas = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado='N'");
         Flight::json(respuesta('00', 'success', $areas));
     }
