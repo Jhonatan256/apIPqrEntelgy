@@ -40,11 +40,11 @@ class PqrClass
         $datos['asunto'] = mb_strtoupper(Flight::request()->data->asunto, 'UTF-8');
         $datos['descripcion'] = Flight::request()->data->descripcion;
         if (empty(Flight::request()->data->idInformador)) {
-            $datos['idInformador'] = $this->crearUsuarioExterno($this->db, Flight::request()->data->nombres, Flight::request()->data->apellidos, Flight::request()->data->email, Flight::request()->data->cargo, Flight::request()->data->area, Flight::request()->data->genero, Flight::request()->data->tipoUsuario);
+            $datosUsuario = $this->crearUsuarioExterno($this->db, Flight::request()->data->nombres, Flight::request()->data->apellidos, Flight::request()->data->email, Flight::request()->data->cargo, Flight::request()->data->area, Flight::request()->data->genero, Flight::request()->data->tipoUsuario);
         } else {
             $datosUsuario = \Utilitarias::datosUsuario($this->db, Flight::request()->data->idInformador);
-            $datos['idInformador'] = $datosUsuario['id'];
         }
+        $datos['idInformador'] = $datosUsuario['id'];
         $datos['idArea'] = Flight::request()->data->idArea;
         $datos['tipoSolicitud'] = Flight::request()->data->tipoSolicitud;
         $datos['porcentaje'] = 0;
@@ -53,7 +53,6 @@ class PqrClass
         $datos['idGravedad'] = 1;
         $datos['idEstado'] = 1;
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
-        imprimir($datos);
         $this->db->insertarRegistro("caso", $datos);
         //
         $historico['idCaso'] = $this->db->lastInsertId();
@@ -129,6 +128,8 @@ class PqrClass
         $datos['password'] = password_hash(rand(5, 15), PASSWORD_DEFAULT);
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
         $db->insertarRegistro("usuario", $datos);
-        return $db->lastInsertId();
+        $datos['nombre'] = $datos['nombres'] . " " . $datos['apellidos'];
+        $datos['id'] = $db->lastInsertId();
+        return $datos;
     }
 }
