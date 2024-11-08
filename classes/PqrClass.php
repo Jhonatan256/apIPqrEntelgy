@@ -40,7 +40,7 @@ class PqrClass
         $datos['asunto'] = mb_strtoupper(Flight::request()->data->asunto, 'UTF-8');
         $datos['descripcion'] = Flight::request()->data->descripcion;
         if (empty(Flight::request()->data->idInformador)) {
-            $this->crearUsuarioExterno($this->db, Flight::request()->data->nombres, light::request()->data->apellidos, Flight::request()->data->cargo);
+            $datos['idInformador'] = $this->crearUsuarioExterno($this->db, Flight::request()->data->nombres, Flight::request()->data->apellidos, Flight::request()->data->email, Flight::request()->data->cargo, Flight::request()->data->area, Flight::request()->data->genero, Flight::request()->data->tipoUsuario);
         } else {
             $datosUsuario = \Utilitarias::datosUsuario($this->db, Flight::request()->data->idInformador);
             $datos['idInformador'] = $datosUsuario['id'];
@@ -53,6 +53,7 @@ class PqrClass
         $datos['idGravedad'] = 1;
         $datos['idEstado'] = 1;
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
+        imprimir($datos);
         $this->db->insertarRegistro("caso", $datos);
         //
         $historico['idCaso'] = $this->db->lastInsertId();
@@ -114,20 +115,20 @@ class PqrClass
             Flight::json(respuesta('99', 'Sin registros.'));
         }
     }
-    public function crearUsuarioExterno($db, $nombres, $apellidos, $email, $cargo, $area, $genero)
+    public function crearUsuarioExterno($db, $nombres, $apellidos, $email, $cargo, $area, $genero, $tipoUsuario)
     {
         $datos['nombres'] = mb_strtoupper($nombres, 'UTF-8');
         $datos['apellidos'] = mb_strtoupper($apellidos, 'UTF-8');
         $datos['identificacion'] = '';
         $datos['email'] = $email;
         $datos['celular'] = '';
-        $datos['tipoUsuario'] = 4;
+        $datos['tipoUsuario'] = $tipoUsuario;
         $datos['cargo'] = mb_strtoupper($cargo, 'UTF-8');
-        $datos['area'] = $area;
+        $datos['area'] = $area ?? 0;
         $datos['genero'] = $genero;
         $datos['password'] = password_hash(rand(5, 15), PASSWORD_DEFAULT);
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
         $db->insertarRegistro("usuario", $datos);
-        return $db->last_insert_id();
+        return $db->lastInsertId();
     }
 }
