@@ -20,6 +20,7 @@ require_once 'includes/config.php';
 //
 require_once 'classes/PqrClass.php';
 require_once 'classes/UsersClass.php';
+require_once 'model/Utilitarias.php';
 require_once 'model/Database.php';
 //
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);

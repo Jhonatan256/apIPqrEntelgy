@@ -10,8 +10,9 @@ class PqrClass
     {
         // validateToken();
         $id = Flight::request()->data->id;
+
         $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
-        $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
+        $query .= "FROM caso c LEFT JOIN usuario u ON u.id = c.idInformador LEFT JOIN usuario r ON r.id = c.idResponsable LEFT JOIN area a ON a.id = c.idArea LEFT JOIN gravedad g ON g.id = c.idGravedad LEFT JOIN prioridad p ON p.id = c.idPrioridad LEFT JOIN estado e ON e.id = c.idEstado LEFT JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
         $query .= " WHERE c.id=$id";
         $pqr['caso'] = $this->db->consultarRegistro($query);
 
@@ -35,10 +36,12 @@ class PqrClass
     }
     public function registrarPqr()
     {
-        validateToken();
+        // validateToken();
         $datos['asunto'] = mb_strtoupper(Flight::request()->data->asunto, 'UTF-8');
         $datos['descripcion'] = Flight::request()->data->descripcion;
         $datos['idInformador'] = Flight::request()->data->idInformador;
+        $datos['idArea'] = Flight::request()->data->idArea;
+        $datos['tipoSolicitud'] = Flight::request()->data->tipoSolicitud;
         $datos['porcentaje'] = 0;
         $datos['idResponsable'] = 13;
         $datos['idPrioridad'] = 1;
@@ -56,7 +59,17 @@ class PqrClass
         $historico['porcentaje'] = $datos['porcentaje'];
         $historico['fecha'] = $datos['fechaCreacion'];
         $this->crearHistorico($historico);
-        Flight::json(respuesta('00', 'success', $historico['idCaso']));
+        $msj = 'Se creó la solicitud con éxito.';
+        $datosUsuario = \Utilitarias::datosUsuario($this->db, $datos['idInformador']);
+        $asunto = $historico['idCaso'] . ' - Notificación de Registro de Requerimiento';
+        $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
+        $mensaje .= "<p>Se registro el siguiente requerimiento <b>#" . $historico['idCaso'] . "</b></p>";
+        $url = URL_SISTEMA . "NuevoPqr?idCaso=" . $historico['idCaso'];
+        $mensaje .= "<p>Puedes ver el estado del requerimiento en <a href='$url' target='_blank'>" . URL_SISTEMA . "</p>";
+        if (!\Utilitarias::enviarEmail($datosUsuario['email'], $asunto, $mensaje)) {
+            $msj = 'Correo no enviado.';
+        }
+        Flight::json(respuesta('00', $msj, $historico['idCaso']));
     }
     public function crearHistorico($datos)
     {
