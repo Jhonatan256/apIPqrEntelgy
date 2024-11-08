@@ -65,7 +65,7 @@ class PqrClass
     }
     public function formularioPqr()
     {
-        validateToken();
+        // validateToken();
         $usuario = $this->db->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => Flight::request()->data->email]);
         if ($usuario) {
             $datos['usuario'] = $usuario;

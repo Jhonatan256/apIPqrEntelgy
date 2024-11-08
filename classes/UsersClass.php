@@ -40,19 +40,29 @@ class UsersClass
     }
     public function createUser()
     {
-        $datos['nombres'] = mb_strtoupper(Flight::request()->data->nombres, 'UTF-8');
-        $datos['apellidos'] = mb_strtoupper(Flight::request()->data->apellidos, 'UTF-8');
-        $datos['identificacion'] = Flight::request()->data->identificacion;
-        $datos['email'] = Flight::request()->data->email;
-        $datos['celular'] = Flight::request()->data->celular;
-        $datos['tipoUsuario'] = Flight::request()->data->tipoUsuario;
-        $datos['cargo'] = mb_strtoupper(Flight::request()->data->cargo, 'UTF-8');
-        $datos['area'] = Flight::request()->data->area;
-        $datos['genero'] = mb_strtoupper(Flight::request()->data->genero, 'UTF-8');
-        $datos['password'] = password_hash(Flight::request()->data->password, PASSWORD_DEFAULT);
-        $datos['fechaCreacion'] = date('Y-m-d H:i:s');
-        $this->db->insertarRegistro("usuario", $datos);
-        Flight::json(respuesta('00', 'success', $this->db->lastInsertId()));
+        $email = Flight::request()->data->email;
+        $usuario = $this->db->consultarRegistro('SELECT * FROM usuario WHERE email= :email', ['email' => $email]);
+        if ($usuario) {
+            return Flight::json(respuesta('99', 'El usuario ya esta registrado.'));
+        }
+
+        if (strpos($email, '@entelgy.com') !== false) {
+            $datos['nombres'] = mb_strtoupper(Flight::request()->data->nombres, 'UTF-8');
+            $datos['apellidos'] = mb_strtoupper(Flight::request()->data->apellidos, 'UTF-8');
+            $datos['identificacion'] = Flight::request()->data->identificacion;
+            $datos['email'] = Flight::request()->data->email;
+            $datos['celular'] = Flight::request()->data->celular;
+            $datos['tipoUsuario'] = Flight::request()->data->tipoUsuario;
+            $datos['cargo'] = mb_strtoupper(Flight::request()->data->cargo, 'UTF-8');
+            $datos['area'] = Flight::request()->data->area;
+            $datos['genero'] = mb_strtoupper(Flight::request()->data->genero, 'UTF-8');
+            $datos['password'] = password_hash(Flight::request()->data->password, PASSWORD_DEFAULT);
+            $datos['fechaCreacion'] = date('Y-m-d H:i:s');
+            $this->db->insertarRegistro("usuario", $datos);
+            return Flight::json(respuesta('00', 'success', $this->db->lastInsertId()));
+        } else {
+            return Flight::json(respuesta('99', 'Por favor, digite el correo corporativo.'));
+        }
     }
 
 }
