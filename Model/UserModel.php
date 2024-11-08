@@ -56,7 +56,18 @@ class UserModel extends Database
         $datos['idEstado'] = 1;
         $datos['fechaCreacion'] = date('Y-m-d H:i:s');
         $this->insertarRegistro("caso", $datos);
-        return $this->lastInsertId();
+        $id = $this->lastInsertId();
+        //
+        $historico['idCaso'] = $id;
+        $historico['idResponsable'] = $datos['idInformador'];
+        $historico['idEncargado'] = 13;
+        $historico['cambioEstado'] = $datos['idEstado'];
+        $historico['descripcion'] = 'Asignación automática del sistema.';
+        $historico['accionesRealizadas'] = 'Asignación';
+        $historico['porcentaje'] = $datos['porcentaje'];
+        $historico['fecha'] = $datos['fechaCreacion'];
+        $this->crearHistorico($historico);
+        return $id;
     }
     public function vistaPqr($email)
     {
@@ -109,5 +120,11 @@ class UserModel extends Database
         $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
         $query .= " WHERE c.idInformador= :id";
         return $this->consultarRegistros($query, ['id' => $id]);
+    }
+
+    public function crearHistorico($datos)
+    {
+        $datos['fecha'] = date('Y-m-d H:i:s');
+        $this->insertarRegistro("historial", $datos);
     }
 }
