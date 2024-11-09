@@ -15,26 +15,29 @@ class UsersClass
             $password = Flight::request()->data->password;
             if (password_verify($password, $usuario['password'])) {
                 if ($usuario['eliminado'] == 'S') {
-                    $salida = respuesta('99', 'Usuario eliminado.');
+                    return Flight::json(respuesta('99', 'Usuario eliminado'));
                 } else {
                     unset($usuario['password']);
-                    $usuario['fechaUltimoAcceso'] = date('Y-m-d H:i:s');
-                    $this->db->actualizarRegistro('usuario', ['fechaUltimoAcceso' => $usuario['fechaUltimoAcceso']], ['id' => $usuario['id']]);
-                    $key = $_ENV['KEY_TOKEN'];
-                    $now = strtotime("now");
-                    $payload = [
-                        'exp' => $now + 3600,
-                        'data' => $usuario['id'],
-                    ];
-                    $usuario['token'] = JWT::encode($payload, $key, 'HS256');
-                    $salida = respuesta('00', 'Success', $usuario);
                 }
+                if($usuario['tipoUsuario'] != '1' && $usuario['tipoUsuario'] != '3'){
+                    return Flight::json(respuesta('99', 'El tipo de usuario no puede acceder al sistema.'));
+                }
+                $usuario['fechaUltimoAcceso'] = date('Y-m-d H:i:s');
+                $this->db->actualizarRegistro('usuario', ['fechaUltimoAcceso' => $usuario['fechaUltimoAcceso']], ['id' => $usuario['id']]);
+                $key = $_ENV['KEY_TOKEN'];
+                $now = strtotime("now");
+                $payload = [
+                    'exp' => $now + 3600,
+                    'data' => $usuario['id'],
+                ];
+                $usuario['token'] = JWT::encode($payload, $key, 'HS256');
+                return Flight::json(respuesta('00', 'Success', $usuario));
 
             } else {
-                $salida = respuesta('99', 'Constraseña incorrecta.');
+                return Flight::json(respuesta('99', 'Constraseña incorrecta.'));
             }
         } else {
-            $salida = respuesta('88', 'El usuario no esta registrado.');
+            return Flight::json(respuesta('88', 'El usuario no esta registrado.'));
         }
         Flight::json($salida);
     }
@@ -71,7 +74,7 @@ class UsersClass
         if ($datosUsuario) {
             $clave = generarAleatorioClave();
             $this->db->actualizarRegistro('usuario', ['password' => password_hash($clave, PASSWORD_DEFAULT)], ['id' => $datosUsuario['id']]);
-            $asunto = rand(1-15) . ' Olvido de clave - ' . NOMBRE_SISTEMA;
+            $asunto = rand(5, 15) . ' Olvido de clave - ' . NOMBRE_SISTEMA;
             $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
             $mensaje .= "<p>Se ha generado la siguiente clave dinámica <b>$clave</b></p>";
             $url = URL_SISTEMA;
