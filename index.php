@@ -34,7 +34,8 @@ Flight::route('GET|POST /', function () {
 //
 Flight::route('POST /login', ['UsersClass', 'loginUser']);
 Flight::route('POST /createUser', ['UsersClass', 'createUser']);
-Flight::route('POST /forgotPassword?', ['UsersClass', 'olvidoClave']);
+Flight::route('POST /forgotPassword', ['UsersClass', 'olvidoClave']);
+Flight::route('POST /listUsers', ['UsersClass', 'listarUsuarios']);
 //
 Flight::route('POST /searchPqr', ['PqrClass', 'buscarPqr']);
 Flight::route('POST /createPqr', ['PqrClass', 'registrarPqr']);
@@ -60,7 +61,7 @@ function validateToken()
 {
     $info = getToken();
     $db = new Database();
-    $datos = $db->consultarRegistro('SELECT id FROM usuario WHERE id = :id', ['id' => $info->data]);
+    $datos = $db->consultarRegistro('SELECT id FROM usuario WHERE id = :id', ['id' => $info->data->id]);
     if (!$datos) {
         Flight::jsonHalt(respuesta('99', 'Token inválido.'), 403);
     }

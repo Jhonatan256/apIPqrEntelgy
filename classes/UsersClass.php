@@ -19,7 +19,7 @@ class UsersClass
                 } else {
                     unset($usuario['password']);
                 }
-                if($usuario['tipoUsuario'] != '1' && $usuario['tipoUsuario'] != '3'){
+                if ($usuario['tipoUsuario'] != '1' && $usuario['tipoUsuario'] != '3') {
                     return Flight::json(respuesta('99', 'El tipo de usuario no puede acceder al sistema.'));
                 }
                 $usuario['fechaUltimoAcceso'] = date('Y-m-d H:i:s');
@@ -28,7 +28,7 @@ class UsersClass
                 $now = strtotime("now");
                 $payload = [
                     'exp' => $now + 3600,
-                    'data' => $usuario['id'],
+                    'data' => ['id' => $usuario['id'], 'tipoUsuario' => $usuario['tipoUsuario']],
                 ];
                 $usuario['token'] = JWT::encode($payload, $key, 'HS256');
                 return Flight::json(respuesta('00', 'Success', $usuario));
@@ -88,5 +88,14 @@ class UsersClass
             return Flight::json(respuesta('99', 'El usuario no esta registrado.'));
 
         }
+    }
+    public function listarUsuarios()
+    {
+        validateToken();
+        $info = getToken();
+        if ($info->data->tipoUsuario != 3) {
+            return Flight::json(respuesta('99', 'El usuario no tiene los permisos para consultar enta acción.'));
+        }
+        imprimir($info);
     }
 }
