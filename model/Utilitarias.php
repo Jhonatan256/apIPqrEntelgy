@@ -1,7 +1,6 @@
 <?php
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 
 require 'vendor/autoload.php';
 class Utilitarias
@@ -62,7 +61,7 @@ class Utilitarias
             $mail->CharSet = 'UTF-8';
             $mail->Subject = "=?UTF-8?B?" . base64_encode($asunto) . "=?=";
             $footer = "<hr></hr><h4>Por favor, no responda a este correo, correo generado automáticamente.</h4>";
-            $footer .= "<h3>Sistema de registro de PQR.</h3>";
+            $footer .= "<h3>Sistema de registro de PQR - Entelgy Colombia.</h3>";
             $mail->Body = $mensaje . $footer;
             $mail->Send();
             return true;
@@ -122,4 +121,144 @@ function generarAleatorioClave($longitud = 6)
         }
     }
     return $clave;
+}
+function imprimir($datos)
+{
+    echo "<pre>";
+    print_r($datos);
+    echo "</pre>";
+    die();
+}
+function calcularPorcentaje($ticket, $valor =false)
+{
+    date_default_timezone_set('America/Bogota');
+    $validDate = false;
+    $fechaInicial = date('Y-m-d');
+    //Fechas a calcular
+    $fechasCalcular[] = $fechaInicial;
+    $fecha = explode(" ", $ticket['fechaCreacion']);
+    $fechaCreacion = $fecha[0];
+    $horaCreacion = $fecha[1];
+    if ($fechaInicial > $fechaCreacion) {
+        while ($validDate === false) {
+            $fechaInicial = date("Y-m-d", strtotime($fechaInicial . "- 1 days"));
+            $fechasCalcular[] = $fechaInicial;
+            if ($fechaInicial == $fechaCreacion) {
+                $validDate = true;
+            }
+        }
+    }
+    foreach ($fechasCalcular as $key => $value) {
+        $diasemana = saberDia($value);
+        if ($diasemana == 'Sabado' || $diasemana == 'Domingo') {
+            unset($fechasCalcular[$key]);
+        }
+    }
+    $horas = 0;
+    $horaActual = date('H:i:s');
+    $fechasCalcular = array_reverse($fechasCalcular);
+    foreach ($fechasCalcular as $key => $value) {
+        if ($value == $fechaCreacion) {
+            $calculo = true;
+            if ($horaCreacion >= '08:00:00' && $horaCreacion <= '17:00:00') {
+                if (date('Y-m-d') == $value) {
+                    if ($horaActual >= '08:00:00' && $horaActual <= '17:00:00') {
+                        $fechaUno = date_create($value . " " . $horaCreacion);
+                        $fechaDos = date_create("$value $horaActual");
+                    } else {
+                        $calculo = false;
+                    }
+                } else {
+                    $fechaUno = date_create($value . " " . $horaCreacion);
+                    $fechaDos = date_create("$value 17:00:00");
+                }
+            } else {
+                if (date('Y-m-d') == $value && ($horaActual >= '08:00:00' && $horaActual <= '17:00:00')) {
+                    $fechaUno = date_create("$value 08:00:00");
+                    $fechaDos = date_create("$value $horaActual");
+                } else {
+                    $calculo = false;
+                }
+            }
+            if ($calculo) {
+                $diferencia = date_diff($fechaUno, $fechaDos);
+                $minutos = $diferencia->days * 24 * 60;
+                $minutos += $diferencia->h * 60;
+                $minutos += $diferencia->i;
+                $horas = $horas + ($minutos / 60);
+            }
+        } else {
+            $calculo = true;
+            if (date('Y-m-d') == $value) {
+                if ($horaActual > '17:00:00' && $horaActual < '24:00:00') {
+                    $horaActual = '17:00:00';
+                }
+                if ($horaActual > '24:00:00' && $horaActual < '08:00:00') {
+                    $horaActual = '08:00:00';
+                }
+                if ($horaActual >= '08:00:00' && $horaActual <= '17:00:00') {
+                    $fechaUno = date_create("$value 08:00:00");
+                    $fechaDos = date_create("$value $horaActual");
+                } else {
+                    $calculo = false;
+                }
+            } else {
+                $fechaUno = date_create("$value 08:00:00");
+                $fechaDos = date_create("$value 17:00:00");
+            }
+            if ($calculo) {
+                $diferencia = date_diff($fechaUno, $fechaDos);
+                $minutos = $diferencia->days * 24 * 60;
+                $minutos += $diferencia->h * 60;
+                $minutos += $diferencia->i;
+                $horas = $horas + ($minutos / 60);
+            }
+        }
+    }
+    $ans = 40;
+    try {
+        $salida['progreso'] = calcularBarraProgreso($horas, $ans, 100);
+    } catch (Exception $e) {
+        $salida['progreso'] = $horas;
+    }
+    if($valor){
+        return $salida['progreso'];
+    }
+    $calculo = $salida['progreso'] = str_replace(',', '', $salida['progreso']);
+    if ($calculo < 40) {
+        $salida['color'] = 'primary';
+        $salida['alerta'] = 'BAJA';
+    }
+    if ($calculo > 40 && $salida['progreso'] < 90) {
+        $salida['color'] = 'warning text-dark';
+        $salida['alerta'] = 'MEDIA';
+    }
+    if ($calculo > 90) {
+        $salida['color'] = 'danger';
+        $salida['alerta'] = ($salida['progreso'] > 100) ? 'MAXIMA' : 'ALTA';
+    }
+    return $salida;
+}
+function saberDia($nombredia)
+{
+    $dias[0] = 'Domingo';
+    $dias[1] = 'Lunes';
+    $dias[2] = 'Martes';
+    $dias[3] = 'Miercoles';
+    $dias[4] = 'Jueves';
+    $dias[5] = 'Viernes';
+    $dias[6] = 'Sabado';
+    $dias[7] = 'Domingo';
+    return $dias[date('N', strtotime($nombredia))];
+}
+function calcularBarraProgreso($valor, $ans, $porcentaje)
+{
+    if ($valor > $ans) {
+        $valor = $valor / $ans;
+        $valor = $valor * 100;
+    } else {
+        $ans = empty($ans) ? 8 : $ans;
+        $valor = ($valor / $porcentaje) * $ans;
+    }
+    return number_format($valor, 2);
 }

@@ -42,6 +42,8 @@ Flight::route('POST /createPqr', ['PqrClass', 'registrarPqr']);
 Flight::route('POST /getViewPqr', ['PqrClass', 'formularioPqr']);
 Flight::route('POST /getAreas', ['PqrClass', 'areas']);
 Flight::route('POST /listPqr', ['PqrClass', 'listarPqr']);
+Flight::route('POST /updateActionPqr', ['PqrClass', 'cambiarEstado']);
+//
 //
 Flight::start();
 
@@ -49,12 +51,12 @@ function getToken()
 {
     $headers = apache_request_headers();
     if (!isset($headers['Authorization'])) {
-        Flight::jsonHalt(respuesta('99', msj: 'Sin token de acceso.'), 401);
+        Flight::jsonHalt(respuesta('77', msj: 'Sin token de acceso.'), 401);
     }
     try {
         return JWT::decode(str_replace('Bearer ', '', $headers['Authorization']), new Key($_ENV['KEY_TOKEN'], 'HS256'));
     } catch (\Throwable $th) {
-        Flight::jsonHalt(respuesta('99', 'Token fail: ' . $th), 401);
+        Flight::jsonHalt(respuesta('77', 'Expired token.'), 401);
     }
 }
 function validateToken()
@@ -63,7 +65,7 @@ function validateToken()
     $db = new Database();
     $datos = $db->consultarRegistro('SELECT id FROM usuario WHERE id = :id', ['id' => $info->data->id]);
     if (!$datos) {
-        Flight::jsonHalt(respuesta('99', 'Token inválido.'), 403);
+        Flight::jsonHalt(respuesta('77', 'Token inválido.'), 403);
     }
 }
 function respuesta($cod, $msj, $datos = [])
@@ -73,11 +75,4 @@ function respuesta($cod, $msj, $datos = [])
     } else {
         return ['codigo' => $cod, 'mensaje' => $msj];
     }
-}
-function imprimir($datos)
-{
-    echo "<pre>";
-    print_r($datos);
-    echo "</pre>";
-    die();
 }
