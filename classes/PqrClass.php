@@ -15,8 +15,8 @@ class PqrClass
         $query .= "FROM caso c LEFT JOIN usuario u ON u.id = c.idInformador LEFT JOIN usuario r ON r.id = c.idResponsable LEFT JOIN area a ON a.id = c.idArea LEFT JOIN gravedad g ON g.id = c.idGravedad LEFT JOIN prioridad p ON p.id = c.idPrioridad LEFT JOIN estado e ON e.id = c.idEstado LEFT JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
         $query .= " WHERE c.id=$id";
         $pqr['caso'] = $this->db->consultarRegistro($query);
-
         if ($pqr['caso']) {
+            $pqr['caso']['porcentaje'] = calcularPorcentaje($pqr['caso'], false);
             $salida['codigo'] = "00";
             $salida['mensaje'] = "";
             $pqr['historial'] = $this->db->consultarRegistros2("SELECT *  FROM historial WHERE idCaso = $id");
@@ -131,5 +131,62 @@ class PqrClass
         $datos['nombre'] = $datos['nombres'] . " " . $datos['apellidos'];
         $datos['id'] = $db->lastInsertId();
         return $datos;
+    }
+    public function cambiarEstado()
+    {
+        validateToken();
+        $pqr = $this->buscarCaso(Flight::request()->data->idCaso);
+        if ($pqr) {
+            $datos['idCaso'] = $pqr['id'];
+            $datos['idResponsable'] = Flight::request()->data->idResponsable;
+            $datos['idEncargado'] = Flight::request()->data->idEncargado;
+            $datos['cambioEstado'] = Flight::request()->data->estado;
+            $datos['descripcion'] = Flight::request()->data->descripcion;
+            $datos['accionesRealizadas'] = '';
+            $email[] = $this->buscarEmail($pqr['idResponsable']);
+            if ($datos['cambioEstado'] != $pqr['idEstado']) {
+                $datos['accionesRealizadas'] .= 'Cambio de estado: ' . $this->buscarEstado($pqr['idEstado']) . ' a ' . $this->buscarEstado($datos['cambioEstado']);
+            }
+            if ($datos['idEncargado'] != $pqr['idResponsable']) {
+                $datos['accionesRealizadas'] .= '<br>Cambio de usuario: ' . $this->buscarNombre($pqr['idResponsable']) . ' a ' . $this->buscarNombre($datos['idEncargado']);
+                $email[] = $this->buscarEmail($datos['idEncargado']);
+            }
+            $datos['porcentaje'] = calcularPorcentaje($pqr, true);
+            $datos['fecha'] = date('Y-m-d H:i:s');
+            $this->db->insertarRegistro("historial", $datos);
+            //
+            $asunto = $pqr['id'] . ' - Notificación actualización de Requerimiento';
+            $mensaje = "<h3>Se ha realizado el siguiente cambio para el caso #" . $pqr['id'] . "</h3>";
+            $mensaje .= "<p>A continuación se presentará el resumen:</p>";
+            $mensaje .= $datos['descripcion'];
+            $url = URL_SISTEMA . "NuevoPqr?idCaso=" . $pqr['id'];
+            $mensaje .= "<p>Puedes ver el estado del requerimiento en <a href='$url' target='_blank'>" . URL_SISTEMA . "</p>";
+            \Utilitarias::enviarEmail($email, $asunto, $mensaje);
+            Flight::json(respuesta('00', '', $pqr['id']));
+        } else {
+            Flight::json(respuesta('99', 'El caso no existe.'));
+        }
+    }
+    public function buscarCaso($id)
+    {
+        $query = "SELECT c.*, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
+        $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
+        $query .= " WHERE c.id= :id";
+        return $this->db->consultarRegistro($query, ['id' => $id]);
+    }
+    public function buscarEstado($id)
+    {
+        $query = "SELECT nombre FROM estado WHERE id = :id";
+        return $this->db->consultarRegistro($query, ['id' => $id], 'nombre');
+    }
+    public function buscarNombre($id)
+    {
+        $query = "SELECT nombres FROM usuario WHERE id = :id";
+        return $this->db->consultarRegistro($query, ['id' => $id], 'nombres');
+    }
+    public function buscarEmail($id)
+    {
+        $query = "SELECT email FROM usuario WHERE id = :id";
+        return $this->db->consultarRegistro($query, ['id' => $id], 'email');
     }
 }
