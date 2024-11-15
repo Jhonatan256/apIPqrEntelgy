@@ -22,7 +22,7 @@ class PqrClass
             $pqr['historial'] = $this->db->consultarRegistros2("SELECT *  FROM historial WHERE idCaso = $id");
             $pqr['areas'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM area WHERE eliminado ='N'");
             $pqr['tipoCaso'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM tipocaso WHERE eliminado ='N'");
-            $pqr['usuarios'] = $this->db->consultarRegistros2("SELECT CONCAT(u.nombres, ' ', u.apellidos) AS nombre, u.email, a.nombre AS area FROM usuario u JOIN area a ON a.id = u.area WHERE u.eliminado ='N'");
+            $pqr['usuarios'] = $this->db->consultarRegistros2("SELECT u.id, CONCAT(u.nombres, ' ', u.apellidos) AS nombre, u.email, a.nombre AS area FROM usuario u JOIN area a ON a.id = u.area WHERE u.eliminado ='N'");
             $pqr['estados'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM estado WHERE eliminado ='N'");
             $pqr['gravedad'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM gravedad WHERE eliminado ='N'");
             $pqr['prioridad'] = $this->db->consultarRegistros2("SELECT id, nombre  FROM prioridad WHERE eliminado ='N'");
