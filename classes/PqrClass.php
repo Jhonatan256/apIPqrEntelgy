@@ -84,7 +84,7 @@ class PqrClass
     public function formularioPqr()
     {
         // validateToken();
-        $usuario = $this->db->consultarRegistro("SELECT id, email, nombres  FROM usuario WHERE email = :email ", ["email" => Flight::request()->data->email]);
+        $usuario = $this->db->consultarRegistro("SELECT id, email, nombres, area, tipoUsuario  FROM usuario WHERE email = :email ", ["email" => Flight::request()->data->email]);
         if ($usuario) {
             $datos['usuario'] = $usuario;
         } else {
@@ -105,8 +105,10 @@ class PqrClass
         // validateToken();
         $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
         $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
-        $query .= " WHERE c.idInformador= :id";
-        $casos = $this->db->consultarRegistros2($query, ['id' => Flight::request()->data->id]);
+        // $query .= " WHERE c.idInformador= :id";
+        $query .= " WHERE 1=1";
+        // $casos = $this->db->consultarRegistros2($query, ['id' => Flight::request()->data->id]);
+        $casos = $this->db->consultarRegistros2($query);
         if ($casos) {
             Flight::json(respuesta('00', '', $casos));
         } else {
