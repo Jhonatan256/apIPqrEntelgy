@@ -69,7 +69,7 @@ class PqrClass
         $asunto = $historico['idCaso'] . ' - Notificación de Registro de Requerimiento';
         $mensaje = "<h3>" . generoCorreo($datosUsuario['genero']) . $datosUsuario['nombre'] . "</h3>";
         $mensaje .= "<p>Se registro el siguiente requerimiento <b>#" . $historico['idCaso'] . "</b></p>";
-        $url = URL_SISTEMA . "NuevoPqr?idCaso=" . $historico['idCaso'];
+        $url = URL_SISTEMA . "pqr?idCaso=" . $historico['idCaso'];
         $mensaje .= "<p>Puedes ver el estado del requerimiento en <a href='$url' target='_blank'>" . URL_SISTEMA . "</p>";
         if (!\Utilitarias::enviarEmail($datosUsuario['email'], $asunto, $mensaje)) {
             $msj = 'Correo no enviado.';
@@ -159,7 +159,7 @@ class PqrClass
             $mensaje = "<h3>Se ha realizado el siguiente cambio para el caso #" . $pqr['id'] . "</h3>";
             $mensaje .= "<p>A continuación se presentará el resumen:</p>";
             $mensaje .= $datos['descripcion'];
-            $url = URL_SISTEMA . "NuevoPqr?idCaso=" . $pqr['id'];
+            $url = URL_SISTEMA . "pqr?idCaso=" . $pqr['id'];
             $mensaje .= "<p>Puedes ver el estado del requerimiento en <a href='$url' target='_blank'>" . URL_SISTEMA . "</p>";
             \Utilitarias::enviarEmail($email, $asunto, $mensaje);
             Flight::json(respuesta('00', '', $pqr['id']));
