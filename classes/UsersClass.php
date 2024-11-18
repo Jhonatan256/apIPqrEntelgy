@@ -96,6 +96,7 @@ class UsersClass
         if ($info->data->tipoUsuario != 3) {
             return Flight::json(respuesta('99', 'El usuario no tiene los permisos para consultar enta acción.'));
         }
-        imprimir($info);
+        $usuarios = $this->db->consultarRegistros("SELECT id, nombres, apellidos, identificacion, email, celular, tipoUsuario, cargo, area, genero, fechaCreacion, fechaUltimoAcceso, eliminado FROM usuario WHERE eliminado = 'N' ORDER BY id DESC");
+        return Flight::json(respuesta('00', '', $usuarios));
     }
 }
