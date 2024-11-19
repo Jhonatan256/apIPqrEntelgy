@@ -226,15 +226,15 @@ function calcularPorcentaje($ticket, $valor =false)
     }
     $calculo = $salida['progreso'] = str_replace(',', '', $salida['progreso']);
     if ($calculo < 40) {
-        $salida['color'] = 'primary';
+        $salida['color'] = '#007bff';
         $salida['alerta'] = 'BAJA';
     }
-    if ($calculo > 40 && $salida['progreso'] < 90) {
-        $salida['color'] = 'warning text-dark';
+    if ($calculo > 40 && $salida['progreso'] < 85) {
+        $salida['color'] = '#f6fd12';
         $salida['alerta'] = 'MEDIA';
     }
     if ($calculo > 90) {
-        $salida['color'] = 'danger';
+        $salida['color'] = '#e51831';
         $salida['alerta'] = ($salida['progreso'] > 100) ? 'MAXIMA' : 'ALTA';
     }
     return $salida;
