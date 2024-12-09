@@ -105,10 +105,10 @@ class PqrClass
         // validateToken();
         $query = "SELECT c.id, c.asunto, c.descripcion, c.fechaCreacion, c.porcentaje, CONCAT(u.nombres, ' ', u.apellidos) AS informador, CONCAT(r.nombres, ' ', r.apellidos) AS responsable, a.nombre AS area, g.nombre AS gravedad, p.nombre AS prioridad, e.nombre AS estado, tc.nombre AS tipoCaso ";
         $query .= "FROM caso c JOIN usuario u ON u.id = c.idInformador JOIN usuario r ON r.id = c.idResponsable JOIN area a ON a.id = c.idArea JOIN gravedad g ON g.id = c.idGravedad JOIN prioridad p ON p.id = c.idPrioridad JOIN estado e ON e.id = c.idEstado JOIN tipocaso tc ON tc.id = c.tipoSolicitud";
-        // $query .= " WHERE c.idInformador= :id";
-        $query .= " WHERE 1=1";
+        $query .= " WHERE c.idResponsable= :id";
         // $casos = $this->db->consultarRegistros2($query, ['id' => Flight::request()->data->id]);
-        $casos = $this->db->consultarRegistros2($query);
+        // imprimirDebug()
+        $casos = $this->db->consultarRegistros2($query, ['id' => Flight::request()->data->id]);
         if ($casos) {
             Flight::json(respuesta('00', '', $casos));
         } else {
@@ -148,10 +148,12 @@ class PqrClass
             $email[] = $this->buscarEmail($pqr['idResponsable']);
             if ($datos['cambioEstado'] != $pqr['idEstado']) {
                 $datos['accionesRealizadas'] .= 'Cambio de estado: ' . $this->buscarEstado($pqr['idEstado']) . ' a ' . $this->buscarEstado($datos['cambioEstado']);
+                $this->db->actualizarRegistro('caso', ['idEstado' => $datos['cambioEstado']], ['id' =>$pqr['id']]);
             }
             if ($datos['idEncargado'] != $pqr['idResponsable']) {
                 $datos['accionesRealizadas'] .= '<br>Cambio de usuario: ' . $this->buscarNombre($pqr['idResponsable']) . ' a ' . $this->buscarNombre($datos['idEncargado']);
                 $email[] = $this->buscarEmail($datos['idEncargado']);
+                $this->db->actualizarRegistro('caso', ['idResponsable' => $datos['idEncargado']], ['id' =>$pqr['id']]);
             }
             $datos['porcentaje'] = calcularPorcentaje($pqr, true);
             $datos['fecha'] = date('Y-m-d H:i:s');
